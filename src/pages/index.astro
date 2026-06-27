@@ -1,0 +1,45 @@
+---
+import Layout from '../layouts/Layout.astro';
+const user = Astro.locals.user;
+---
+
+<Layout title="EnglishEdu · 홈">
+  <div class="hero">
+    <h1>EnglishEdu</h1>
+    <p>Astro로 만든 간단한 웹사이트입니다.<br />로컬에 사용자 계정을 만들고 관리할 수 있어요.</p>
+  </div>
+
+  <div class="card">
+    {
+      user ? (
+        <>
+          <h2>환영합니다, {user.name}님 👋</h2>
+          <p class="muted">로그인된 상태입니다. 대시보드에서 계정 정보를 확인하세요.</p>
+          <div class="row">
+            <a href="/dashboard" class="btn">대시보드로 이동</a>
+            <a href="/account" class="btn" style="background:var(--border)">내 계정 관리</a>
+          </div>
+        </>
+      ) : (
+        <>
+          <h2>시작하기</h2>
+          <p class="muted">계정을 만들고 로그인하면 개인 대시보드를 사용할 수 있습니다.</p>
+          <div class="row">
+            <a href="/register" class="btn">회원가입</a>
+            <a href="/login" class="btn" style="background:var(--border)">로그인</a>
+          </div>
+        </>
+      )
+    }
+  </div>
+
+  <div class="card">
+    <h2>기능</h2>
+    <ul class="muted">
+      <li>로컬 SQLite 파일에 계정 저장 (<code>data/app.sqlite</code>)</li>
+      <li>scrypt + salt 기반 비밀번호 해싱</li>
+      <li>쿠키 기반 세션 (HttpOnly, 7일 유지)</li>
+      <li>이름 변경 · 비밀번호 변경 · 계정 삭제</li>
+    </ul>
+  </div>
+</Layout>

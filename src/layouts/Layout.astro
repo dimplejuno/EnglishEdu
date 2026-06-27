@@ -1,0 +1,142 @@
+---
+interface Props {
+  title?: string;
+}
+const { title = 'EnglishEdu' } = Astro.props;
+const user = Astro.locals.user;
+const path = new URL(Astro.request.url).pathname;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="nav">
+      <a href="/" class="brand">EnglishEdu</a>
+      <nav>
+        {
+          user ? (
+            <>
+              <a href="/dashboard" class:list={[{ active: path.startsWith('/dashboard') }]}>대시보드</a>
+              <a href="/account" class:list={[{ active: path.startsWith('/account') }]}>내 계정</a>
+              <form method="POST" action="/api/logout" class="inline">
+                <button type="submit" class="link-btn">로그아웃</button>
+              </form>
+              <span class="who">{user.name}님</span>
+            </>
+          ) : (
+            <>
+              <a href="/login" class:list={[{ active: path === '/login' }]}>로그인</a>
+              <a href="/register" class="btn-sm">회원가입</a>
+            </>
+          )
+        }
+      </nav>
+    </header>
+
+    <main class="container">
+      <slot />
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 EnglishEdu · 로컬 계정 데모</span>
+    </footer>
+
+    <style is:global>
+      :root {
+        --bg: #0f1117;
+        --panel: #1a1d27;
+        --border: #2a2f3d;
+        --text: #e6e8ef;
+        --muted: #9aa0b0;
+        --accent: #6366f1;
+        --accent-h: #818cf8;
+        --danger: #ef4444;
+        --ok: #22c55e;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      a { color: var(--accent-h); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        background: var(--panel);
+        border-bottom: 1px solid var(--border);
+      }
+      .brand { font-weight: 800; font-size: 1.25rem; color: var(--text); }
+      .nav nav { display: flex; align-items: center; gap: 1rem; }
+      .nav nav a.active { color: var(--accent-h); font-weight: 600; }
+      .who { color: var(--muted); font-size: .9rem; }
+      .container { width: 100%; max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem; flex: 1; }
+      .footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--border); }
+      h1 { font-size: 1.8rem; margin: 0 0 .5rem; }
+      h2 { font-size: 1.2rem; margin: 0 0 1rem; }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      label { display: block; font-size: .9rem; margin-bottom: .35rem; color: var(--muted); }
+      input {
+        width: 100%;
+        padding: .65rem .75rem;
+        margin-bottom: 1rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 1rem;
+      }
+      input:focus { outline: none; border-color: var(--accent); }
+      button, .btn {
+        display: inline-block;
+        padding: .65rem 1.1rem;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover, .btn:hover { background: var(--accent-h); text-decoration: none; }
+      .btn-sm { padding: .4rem .8rem; background: var(--accent); color: #fff; border-radius: 8px; font-size: .9rem; }
+      .btn-sm:hover { background: var(--accent-h); text-decoration: none; }
+      .btn-danger { background: var(--danger); }
+      .btn-danger:hover { background: #f87171; }
+      .link-btn { background: none; color: var(--accent-h); padding: 0; font-weight: 400; }
+      .link-btn:hover { background: none; text-decoration: underline; }
+      .inline { display: inline; margin: 0; }
+      .alert { padding: .75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: .9rem; }
+      .alert-error { background: rgba(239,68,68,.12); border: 1px solid var(--danger); color: #fca5a5; }
+      .alert-ok { background: rgba(34,197,94,.12); border: 1px solid var(--ok); color: #86efac; }
+      .muted { color: var(--muted); }
+      .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+      .hero { text-align: center; padding: 2rem 0; }
+      .hero p { color: var(--muted); font-size: 1.1rem; }
+      .meta { font-size: .9rem; color: var(--muted); }
+      .meta strong { color: var(--text); }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid var(--border); font-size: .9rem; }
+      th { color: var(--muted); font-weight: 600; }
+    </style>
+  </body>
+</html>

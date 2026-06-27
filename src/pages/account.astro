@@ -1,0 +1,96 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {
+  SESSION_COOKIE,
+  deleteUser,
+  destroySession,
+  getUserById,
+  updateUserName,
+  updateUserPassword,
+  verifyPassword,
+} from '../lib/auth';
+
+const current = Astro.locals.user!;
+let error = '';
+let ok = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = String(form.get('action') ?? '');
+  const user = getUserById(current.id)!;
+
+  if (action === 'name') {
+    const name = String(form.get('name') ?? '').trim();
+    if (!name) error = '이름을 입력해 주세요.';
+    else {
+      updateUserName(user.id, name);
+      ok = '이름이 변경되었습니다.';
+    }
+  } else if (action === 'password') {
+    const cur = String(form.get('current') ?? '');
+    const next = String(form.get('next') ?? '');
+    const confirm = String(form.get('confirm') ?? '');
+    if (!verifyPassword(cur, user.password_hash)) error = '현재 비밀번호가 올바르지 않습니다.';
+    else if (next.length < 6) error = '새 비밀번호는 최소 6자 이상이어야 합니다.';
+    else if (next !== confirm) error = '새 비밀번호가 일치하지 않습니다.';
+    else {
+      updateUserPassword(user.id, next);
+      ok = '비밀번호가 변경되었습니다.';
+    }
+  } else if (action === 'delete') {
+    const cur = String(form.get('current') ?? '');
+    if (!verifyPassword(cur, user.password_hash)) error = '비밀번호가 올바르지 않습니다.';
+    else {
+      const sid = Astro.cookies.get(SESSION_COOKIE)?.value;
+      if (sid) destroySession(sid);
+      deleteUser(user.id);
+      Astro.cookies.delete(SESSION_COOKIE, { path: '/' });
+      return Astro.redirect('/?deleted=1');
+    }
+  }
+}
+
+// 변경 후 최신 정보 반영
+const user = getUserById(current.id)!;
+---
+
+<Layout title="내 계정 · EnglishEdu">
+  <h1>내 계정</h1>
+  {error && <div class="alert alert-error">{error}</div>}
+  {ok && <div class="alert alert-ok">{ok}</div>}
+
+  <div class="card">
+    <h2>이름 변경</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="name" />
+      <label for="name">이름</label>
+      <input id="name" name="name" type="text" value={user.name} required />
+      <button type="submit">이름 저장</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>비밀번호 변경</h2>
+    <form method="POST">
+      <input type="hidden" name="action" value="password" />
+      <label for="current">현재 비밀번호</label>
+      <input id="current" name="current" type="password" autocomplete="current-password" required />
+      <label for="next">새 비밀번호 (6자 이상)</label>
+      <input id="next" name="next" type="password" autocomplete="new-password" required />
+      <label for="confirm">새 비밀번호 확인</label>
+      <input id="confirm" name="confirm" type="password" autocomplete="new-password" required />
+      <button type="submit">비밀번호 변경</button>
+    </form>
+  </div>
+
+  <div class="card" style="border-color:var(--danger)">
+    <h2 style="color:var(--danger)">계정 삭제</h2>
+    <p class="muted">계정과 모든 데이터가 영구적으로 삭제됩니다. 되돌릴 수 없습니다.</p>
+    <form method="POST" onsubmit="return confirm('정말로 계정을 삭제하시겠습니까? 되돌릴 수 없습니다.')">
+      <input type="hidden" name="action" value="delete" />
+      <label for="del-current">비밀번호 확인</label>
+      <input id="del-current" name="current" type="password" autocomplete="current-password" required />
+      <button type="submit" class="btn-danger">계정 영구 삭제</button>
+    </form>
+  </div>
+</Layout>

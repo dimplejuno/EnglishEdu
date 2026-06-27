@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { listUsers } from '../lib/auth';
+
+// 미들웨어가 보호하므로 여기서는 user 가 항상 존재합니다.
+const user = Astro.locals.user!;
+const users = listUsers();
+const joined = new Date(user.created_at + 'Z').toLocaleString('ko-KR');
+---
+
+<Layout title="대시보드 · EnglishEdu">
+  <h1>대시보드</h1>
+
+  <div class="card">
+    <h2>내 정보</h2>
+    <p class="meta">이름: <strong>{user.name}</strong></p>
+    <p class="meta">이메일: <strong>{user.email}</strong></p>
+    <p class="meta">가입일: <strong>{joined}</strong></p>
+    <div class="row" style="margin-top:1rem">
+      <a href="/account" class="btn-sm">계정 관리</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>등록된 사용자 ({users.length}명)</h2>
+    <table>
+      <thead>
+        <tr><th>이름</th><th>이메일</th><th>가입일</th></tr>
+      </thead>
+      <tbody>
+        {
+          users.map((u) => (
+            <tr>
+              <td>{u.name}{u.id === user.id && <span class="muted"> (나)</span>}</td>
+              <td>{u.email}</td>
+              <td>{new Date(u.created_at + 'Z').toLocaleDateString('ko-KR')}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:1rem; font-size:.8rem">
+      ※ 데모 목적으로 전체 사용자 목록을 표시합니다 (비밀번호는 저장되지 않고 해시만 보관).
+    </p>
+  </div>
+</Layout>
